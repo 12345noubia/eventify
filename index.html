@@ -970,7 +970,7 @@ document.querySelectorAll('.chip').forEach(c=>{
 });
 
 /* ══════════════════════════════════════════
-   IMAGE SOURCE (uses provided Unsplash API key)
+   IMAGE SOURCE (Unsplash API only)
 ══════════════════════════════════════════ */
 const UNSPLASH_API_KEY = 'D0VoBabslhk-aM9VW1sHXbY-sO_CVsZDpsM8yDvKQkY';
 async function getPhoto(q,o){
@@ -985,8 +985,8 @@ async function getPhoto(q,o){
     const data = await res.json();
     return data?.urls?.regular || data?.urls?.full || data?.urls?.small;
   } catch (error) {
-    console.warn('Unsplash API failed; falling back to source.unsplash.com', error);
-    return `https://source.unsplash.com/${size}/?${query}`;
+    console.warn('Unsplash API failed:', error);
+    return '';
   }
 }
 
