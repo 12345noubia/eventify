@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Eventify – Don't miss out!</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700&family=Lalezar&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/emailjs.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -25,9 +26,27 @@ button{cursor:pointer;font-family:inherit}
   position:sticky;top:0;z-index:500;
   background:var(--dark);height:72px;
   display:flex;align-items:center;padding:0 clamp(16px,3vw,60px);gap:8px;
+  flex-wrap:wrap;
 }
 .nav-logo{margin-right:auto}
 .nav-links{display:flex;align-items:center;gap:2px;flex-shrink:0}
+@media (max-width: 900px) {
+  .nav-links, .nav-right, .nav-loggedin {
+    display: none !important;
+  }
+  .hamburger {
+    display: flex !important;
+  }
+  #mobileMenu {
+    display: flex !important;
+    position: absolute;
+    top: 72px;
+    left: 0;
+    width: 100%;
+    background: var(--dark);
+    z-index: 1000;
+  }
+}
 .nav-links a{
   color:var(--white);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:500;
   padding:9px 13px;border-radius:6px;transition:background .15s;position:relative;white-space:nowrap;
@@ -48,6 +67,10 @@ button{cursor:pointer;font-family:inherit}
 .nav-right .btn-yellow:hover{background:#f5d800;transform:translateY(-1px)}
 
 /* logged-in nav area */
+.hamburger{display:none;font-size:1.5rem;background:none;border:none;color:white;cursor:pointer}
+.mobile-menu{display:none;position:absolute;top:100%;left:0;background:var(--dark);width:100%;padding:1rem;z-index:1000}
+.mobile-menu.open{display:block}
+.mobile-menu a{display:block;color:white;padding:0.5rem 0}
 .nav-loggedin{display:none;align-items:center;gap:4px;flex-shrink:0}
 .nav-create-btn{
   background:var(--yellow);color:var(--dark);
@@ -85,6 +108,9 @@ button{cursor:pointer;font-family:inherit}
 .profile-dd-divider{height:1px;background:rgba(0,0,0,.07);margin:4px 0}
 
 /* hamburger */
+#mobileMenu {
+  display: none;
+}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:6px;margin-left:8px;flex-shrink:0;border-radius:6px;transition:background .15s}
 .hamburger:hover{background:rgba(255,255,255,.1)}
 .hamburger span{display:block;width:24px;height:2.5px;background:var(--white);border-radius:3px;transition:transform .2s,opacity .2s}
@@ -151,8 +177,10 @@ button{cursor:pointer;font-family:inherit}
   display:none;position:absolute;top:calc(100% + 10px);left:50%;
   transform:translateX(-50%);
   background:var(--white);border-radius:12px;min-width:210px;
-  box-shadow:0 8px 32px rgba(0,0,0,.18);padding:6px 0;z-index:700;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);padding:6px 0;z-index:9999;
   border:1px solid rgba(0,0,0,.07);
+  max-height:300px;
+  overflow-y:auto;
 }
 .loc-dropdown.open{display:block;animation:ddIn .15s ease}
 .loc-dd-item{
@@ -597,7 +625,7 @@ footer{background:var(--dark);padding:56px clamp(20px,4vw,80px) 32px;color:var(-
   </nav>
 
   <!-- MOBILE MENU -->
-  <div id="mobileMenu">
+  <div id="mobileMenu" class="mobile-menu">
     <a href="#">Home</a>
     <a href="#">Events</a>
     <a href="#">About</a>
@@ -808,6 +836,8 @@ function clearSession(){localStorage.removeItem('ev_session')}
 /* ══════════════════════════════════════════
    AUTH MODAL
 ══════════════════════════════════════════ */
+emailjs.init("your_public_key");
+
 function openAuth(panel){
   showPanel(panel||'signup');
   document.getElementById('authOverlay').classList.add('open');
@@ -833,7 +863,7 @@ function togglePw(id,btn){
     :'<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
 }
 
-function handleSignup(){
+async function handleSignup(){
   const name=document.getElementById('su-name').value.trim();
   const email=document.getElementById('su-email').value.trim();
   const pass=document.getElementById('su-pass').value;
@@ -848,6 +878,24 @@ function handleSignup(){
   setSession(newUser);
   closeAuth();
   updateNav(newUser);
+  try {
+    await sendWelcomeEmail(email, name);
+  } catch (error) {
+    console.error('Failed to send welcome email:', error);
+  }
+}
+
+function sendWelcomeEmail(email, name) {
+  const logoSrc = 'data:image/jpeg;base64,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';
+
+  const templateParams = {
+    to_email: email,
+    to_name: name,
+    logo: logoSrc,
+    image: "https://images.unsplash.com/photo-1630450202872-e0829c9d6172?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  };
+
+  return emailjs.send("service_id", "template_id", templateParams);
 }
 
 function handleLogin(){
