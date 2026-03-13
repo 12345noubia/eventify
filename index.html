@@ -970,21 +970,14 @@ document.querySelectorAll('.chip').forEach(c=>{
 });
 
 /* ══════════════════════════════════════════
-   IMAGE SOURCE (Unsplash API only)
+   IMAGE SOURCE (Unsplash Source - no API key required)
 ══════════════════════════════════════════ */
-const UNSPLASH_API_KEY = 'D0VoBabslhk-aM9VW1sHXbY-sO_CVsZDpsM8yDvKQkY';
-async function getPhoto(q,o){
+function getPhoto(q,o){
   const query = encodeURIComponent((q||'event').trim());
-  const url = `https://api.unsplash.com/photos/random?query=${query}&client_id=${UNSPLASH_API_KEY}`;
-  try {
-    const res = await fetch(url);
-    if(!res.ok) throw new Error(`Unsplash API ${res.status}: ${res.statusText}`);
-    const data = await res.json();
-    return data?.urls?.regular || data?.urls?.full || data?.urls?.small || '';
-  } catch (error) {
-    console.error('Unsplash API failed:', error);
-    return '';
-  }
+  let size = '1200x800';
+  if(o === 'squarish') size = '800x800';
+  if(o === 'portrait') size = '800x1100';
+  return Promise.resolve(`https://source.unsplash.com/${size}/?${query}`);
 }
 
 /* ══════════════════════════════════════════
