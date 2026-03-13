@@ -983,16 +983,15 @@ document.querySelectorAll('.chip').forEach(c=>{
 });
 
 /* ══════════════════════════════════════════
-   UNSPLASH
+   IMAGE SOURCE (no API key required)
 ══════════════════════════════════════════ */
-const UKEY='D0VoBabslhk-aM9VW1sHXbY-sO_CVsZDpsM8yDvKQkY';
-async function getPhoto(q,o){
-  try{
-    const r=await fetch(`https://api.unsplash.com/photos/random?query=${encodeURIComponent(q)}&orientation=${o||'landscape'}&client_id=${UKEY}`);
-    if(!r.ok)return'';
-    const d=await r.json();
-    return d.urls?.regular||d.urls?.small||'';
-  }catch(e){return''}
+function getPhoto(q,o){
+  const query=encodeURIComponent((q||'event').trim());
+  let size='1200x800';
+  if(o==='squarish') size='800x800';
+  if(o==='portrait') size='800x1100';
+  // Unsplash Source provides random photos for a given query without requiring an API key.
+  return Promise.resolve(`https://source.unsplash.com/${size}/?${query}`);
 }
 
 /* ══════════════════════════════════════════
