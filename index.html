@@ -970,21 +970,15 @@ document.querySelectorAll('.chip').forEach(c=>{
 });
 
 /* ══════════════════════════════════════════
-   IMAGE SOURCE (Picsum Photos - free random images)
+   IMAGE SOURCE (Lorem Flickr - real random images)
 ══════════════════════════════════════════ */
 function getPhoto(q,o){
-  const query = (q||'event').trim();
-  // Create a simple hash for consistent images per query
-  let hash = 0;
-  for (let i = 0; i < query.length; i++) {
-    hash = ((hash << 5) - hash) + query.charCodeAt(i);
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  const seed = Math.abs(hash) % 1000; // Use seed for consistency
+  const query = encodeURIComponent((q||'event').trim());
   let size = '1200/800';
   if(o === 'squarish') size = '800/800';
   if(o === 'portrait') size = '800/1100';
-  return Promise.resolve(`https://picsum.photos/seed/${seed}/${size}`);
+  const [w,h] = size.split('/');
+  return Promise.resolve(`https://loremflickr.com/${w}/${h}/${query}`);
 }
 
 /* ══════════════════════════════════════════
