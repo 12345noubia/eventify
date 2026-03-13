@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Eventify – Don't miss out!</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700&family=Lalezar&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/emailjs.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13,7 +12,7 @@
   --gray:#5A5A5A;--lgray:#A9A9A9;--purple:#4539B4;
   --white:#fff;--bg:#F5F5F8;--green:#22c55e;--red:#ef4444;
 }
-body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-width:320px;overflow-x:hidden}
+body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-width:320px}
 a{text-decoration:none;color:inherit}
 button{cursor:pointer;font-family:inherit}
 
@@ -149,11 +148,11 @@ button{cursor:pointer;font-family:inherit}
 .loc-btn:hover{color:var(--dark)}
 .loc-arrow{transition:transform .2s;flex-shrink:0}
 .loc-dropdown{
-  display:none;
+  display:none;position:absolute;top:calc(100% + 10px);left:50%;
+  transform:translateX(-50%);
   background:var(--white);border-radius:12px;min-width:210px;
   box-shadow:0 8px 32px rgba(0,0,0,.18);padding:6px 0;z-index:700;
   border:1px solid rgba(0,0,0,.07);
-  max-height:50vh;overflow-y:auto;
 }
 .loc-dropdown.open{display:block;animation:ddIn .15s ease}
 .loc-dd-item{
@@ -409,6 +408,7 @@ footer{background:var(--dark);padding:56px clamp(20px,4vw,80px) 32px;color:var(-
   .s-div{width:100%;height:1px;margin:0}
   .loc-wrap{width:100%;border-top:1px solid rgba(90,90,90,.15)}
   .loc-btn{padding:14px 20px;justify-content:center;width:100%;min-height:52px}
+  .loc-dropdown{left:0;transform:none;min-width:100%;}
   .s-btn{border-radius:0 0 12px 12px;padding:16px;justify-content:center;min-height:52px}
   .ev-grid{grid-template-columns:1fr}
   .cats{grid-template-columns:repeat(3,1fr)}
@@ -418,8 +418,6 @@ footer{background:var(--dark);padding:56px clamp(20px,4vw,80px) 32px;color:var(-
   .create-txt p{margin:0 auto}
   .ft-grid{grid-template-columns:repeat(2,1fr)}
   .promo-section{padding:0 16px 40px}
-  .user-info{flex-direction:column;align-items:flex-end;font-size:12px}
-  .user-info button{padding:4px 8px;font-size:12px}
 }
 @media(max-width:680px){
   .auth-left{display:none}
@@ -810,8 +808,6 @@ function clearSession(){localStorage.removeItem('ev_session')}
 /* ══════════════════════════════════════════
    AUTH MODAL
 ══════════════════════════════════════════ */
-emailjs.init("your_public_key");
-
 function openAuth(panel){
   showPanel(panel||'signup');
   document.getElementById('authOverlay').classList.add('open');
@@ -837,7 +833,7 @@ function togglePw(id,btn){
     :'<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
 }
 
-async function handleSignup(){
+function handleSignup(){
   const name=document.getElementById('su-name').value.trim();
   const email=document.getElementById('su-email').value.trim();
   const pass=document.getElementById('su-pass').value;
@@ -852,38 +848,6 @@ async function handleSignup(){
   setSession(newUser);
   closeAuth();
   updateNav(newUser);
-  try {
-    await sendWelcomeEmail(email, name);
-  } catch (error) {
-    console.error('Failed to send welcome email:', error);
-  }
-}
-
-function sendWelcomeEmail(email, name) {
-  const logoSrc = 'data:image/jpeg;base64,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';
-  const html = `
-    <html>
-    <body style="font-family: Arial, sans-serif; text-align: center;">
-      <img src="${logoSrc}" alt="Eventify Logo" style="height:50px; width:auto; margin-bottom: 20px;">
-      <h1>Welcome to Eventify, ${name}!</h1>
-      <p>Thank you for signing up. Discover amazing events near you.</p>
-      <img src="https://images.unsplash.com/photo-1630450202872-e0829c9d6172?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Welcome Image" style="max-width: 100%; height: auto; margin-top: 20px;">
-    </body>
-    </html>
-  `;
-  return fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer re_NnhDcfoU_QKKNgPydhQrvvzHjAWeV2DHs',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      from: 'Eventify <onboarding@resend.dev>',
-      to: [email],
-      subject: 'Welcome to Eventify!',
-      html: html
-    })
-  });
 }
 
 function handleLogin(){
@@ -949,21 +913,6 @@ function toggleLocDD(e){
   const opening=!dd.classList.contains('open');
   dd.classList.toggle('open');
   arrow.style.transform=opening?'rotate(180deg)':'rotate(0deg)';
-  if (opening) {
-    const btn = e.target.closest('.loc-btn');
-    const rect = btn.getBoundingClientRect();
-    dd.style.position = 'fixed';
-    dd.style.top = (rect.bottom + 10) + 'px';
-    dd.style.left = rect.left + 'px';
-    dd.style.width = rect.width + 'px';
-    dd.style.transform = 'none';
-  } else {
-    dd.style.position = '';
-    dd.style.top = '';
-    dd.style.left = '';
-    dd.style.width = '';
-    dd.style.transform = '';
-  }
 }
 function selectLoc(el,city){
   document.querySelectorAll('.loc-dd-item').forEach(i=>i.classList.remove('active'));
@@ -971,8 +920,6 @@ function selectLoc(el,city){
   document.getElementById('locSelected').textContent=city;
   document.getElementById('locDropdown').classList.remove('open');
   document.getElementById('locArrow').style.transform='rotate(0deg)';
-  currentLocation = city;
-  applyFilters();
 }
 function detectLocation(){
   const sel=document.getElementById('locSelected');
@@ -1031,7 +978,14 @@ const imageUrls = [
   'https://images.unsplash.com/photo-1761839256840-7780a45b85dc?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
 ];
 function getPhoto(q,o){
-  return `https://picsum.photos/400/300?random=${Math.random()}`;
+  const query = (q||'event').trim();
+  // Simple hash to pick consistent image per query
+  let hash = 0;
+  for (let i = 0; i < query.length; i++) {
+    hash = ((hash << 5) - hash) + query.charCodeAt(i);
+  }
+  const index = Math.abs(hash) % imageUrls.length;
+  return Promise.resolve(imageUrls[index]);
 }
 
 /* ══════════════════════════════════════════
@@ -1167,79 +1121,9 @@ async function init(){
     });
   });
 
-  await renderSection('mumbaiEvents',MUMBAI,false);
-  await renderSection('onlineEvents',ONLINE,false);
-  await renderSection('worldEvents',WORLD,true);
-}
-
-/* ══════════════════════════════════════════
-   SEARCH FUNCTIONALITY
-══════════════════════════════════════════ */
-const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-let currentSearch = '';
-let currentLocation = document.getElementById('locSelected').textContent;
-let currentFilter = 'All';
-
-function applyFilters() {
-  currentSearch = searchInput.value.trim().toLowerCase();
-
-  function filterEvents(events) {
-    return events.filter(ev => {
-      if (currentLocation && currentLocation !== 'All') {
-        const venueMatch = ev.venue?.toLowerCase().includes(currentLocation.toLowerCase());
-        if (!venueMatch) return false;
-      }
-      if (currentSearch) {
-        const haystack = `${ev.title} ${ev.venue} ${ev.tag}`.toLowerCase();
-        if (!haystack.includes(currentSearch)) return false;
-      }
-      if (currentFilter === 'Free') {
-        if (!ev.price?.toLowerCase().includes('free')) return false;
-      }
-      if (currentFilter === 'Paid') {
-        if (ev.price?.toLowerCase().includes('free')) return false;
-      }
-      if (currentFilter === 'Today') {
-        if (ev.date !== new Date().toISOString().split('T')[0]) return false;
-      }
-      if (currentFilter === 'This Week') {
-        const today = new Date();
-        const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-        const eventDate = new Date(ev.date);
-        if (!(eventDate >= today && eventDate <= weekFromNow)) return false;
-      }
-      return true;
-    });
-  }
-
-  const filteredMumbai = filterEvents(MUMBAI);
-  const filteredOnline = filterEvents(ONLINE);
-  const filteredWorld = filterEvents(WORLD);
-
-  renderSection('mumbaiEvents', filteredMumbai, false);
-  renderSection('onlineEvents', filteredOnline, false);
-  renderSection('worldEvents', filteredWorld, true);
-}
-
-searchBtn.addEventListener('click', applyFilters);
-searchInput.addEventListener('keydown', event => {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    applyFilters();
-  }
-});
-searchInput.addEventListener('input', () => {
-  clearTimeout(searchInput._timeout);
-  searchInput._timeout = setTimeout(applyFilters, 300);
-});
-
-function filterEvents(category) {
-  currentFilter = category;
-  const chips = document.querySelectorAll('.chip');
-  chips.forEach(chip => chip.classList.remove('active'));
-  event.target.classList.add('active');
-  applyFilters();
+  await renderSection('mumbaiGrid',MUMBAI,false);
+  await renderSection('onlineGrid',ONLINE,false);
+  await renderSection('worldGrid',WORLD,true);
 }
 
 init();
