@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Eventify – Don't miss out!</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700&family=Lalezar&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/emailjs.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -809,6 +810,8 @@ function clearSession(){localStorage.removeItem('ev_session')}
 /* ══════════════════════════════════════════
    AUTH MODAL
 ══════════════════════════════════════════ */
+emailjs.init("your_public_key");
+
 function openAuth(panel){
   showPanel(panel||'signup');
   document.getElementById('authOverlay').classList.add('open');
@@ -1028,14 +1031,7 @@ const imageUrls = [
   'https://images.unsplash.com/photo-1761839256840-7780a45b85dc?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
 ];
 function getPhoto(q,o){
-  const query = (q||'event').trim();
-  // Simple hash to pick consistent image per query
-  let hash = 0;
-  for (let i = 0; i < query.length; i++) {
-    hash = ((hash << 5) - hash) + query.charCodeAt(i);
-  }
-  const index = Math.abs(hash) % imageUrls.length;
-  return Promise.resolve(imageUrls[index]);
+  return `https://picsum.photos/400/300?random=${Math.random()}`;
 }
 
 /* ══════════════════════════════════════════
