@@ -12,7 +12,7 @@
   --gray:#5A5A5A;--lgray:#A9A9A9;--purple:#4539B4;
   --white:#fff;--bg:#F5F5F8;--green:#22c55e;--red:#ef4444;
 }
-body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-width:320px}
+body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-width:320px;overflow-x:hidden}
 a{text-decoration:none;color:inherit}
 button{cursor:pointer;font-family:inherit}
 
@@ -418,6 +418,8 @@ footer{background:var(--dark);padding:56px clamp(20px,4vw,80px) 32px;color:var(-
   .create-txt p{margin:0 auto}
   .ft-grid{grid-template-columns:repeat(2,1fr)}
   .promo-section{padding:0 16px 40px}
+  .user-info{flex-direction:column;align-items:flex-end;font-size:12px}
+  .user-info button{padding:4px 8px;font-size:12px}
 }
 @media(max-width:680px){
   .auth-left{display:none}
@@ -1121,9 +1123,85 @@ async function init(){
     });
   });
 
-  await renderSection('mumbaiGrid',MUMBAI,false);
-  await renderSection('onlineGrid',ONLINE,false);
-  await renderSection('worldGrid',WORLD,true);
+  await renderSection('mumbaiEvents',MUMBAI,false);
+  await renderSection('onlineEvents',ONLINE,false);
+  await renderSection('worldEvents',WORLD,true);
+}
+
+/* ══════════════════════════════════════════
+   SEARCH FUNCTIONALITY
+══════════════════════════════════════════ */
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const locationSelect = document.getElementById('locationSelect');
+let currentSearch = '';
+let currentLocation = locationSelect.value;
+let currentFilter = 'All';
+
+function applyFilters() {
+  currentSearch = searchInput.value.trim().toLowerCase();
+
+  function filterEvents(events) {
+    return events.filter(ev => {
+      if (currentLocation && currentLocation !== 'All') {
+        const venueMatch = ev.venue?.toLowerCase().includes(currentLocation.toLowerCase());
+        if (!venueMatch) return false;
+      }
+      if (currentSearch) {
+        const haystack = `${ev.title} ${ev.venue} ${ev.tag}`.toLowerCase();
+        if (!haystack.includes(currentSearch)) return false;
+      }
+      if (currentFilter === 'Free') {
+        if (!ev.price?.toLowerCase().includes('free')) return false;
+      }
+      if (currentFilter === 'Paid') {
+        if (ev.price?.toLowerCase().includes('free')) return false;
+      }
+      if (currentFilter === 'Today') {
+        if (ev.date !== new Date().toISOString().split('T')[0]) return false;
+      }
+      if (currentFilter === 'This Week') {
+        const today = new Date();
+        const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const eventDate = new Date(ev.date);
+        if (!(eventDate >= today && eventDate <= weekFromNow)) return false;
+      }
+      return true;
+    });
+  }
+
+  const filteredMumbai = filterEvents(MUMBAI);
+  const filteredOnline = filterEvents(ONLINE);
+  const filteredWorld = filterEvents(WORLD);
+
+  renderSection('mumbaiEvents', filteredMumbai, false);
+  renderSection('onlineEvents', filteredOnline, false);
+  renderSection('worldEvents', filteredWorld, true);
+}
+
+searchBtn.addEventListener('click', applyFilters);
+searchInput.addEventListener('keydown', event => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    applyFilters();
+  }
+});
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchInput._timeout);
+  searchInput._timeout = setTimeout(applyFilters, 300);
+});
+
+locationSelect.addEventListener('change', () => {
+  currentLocation = locationSelect.value;
+  applyFilters();
+});
+
+function filterEvents(category) {
+  currentFilter = category;
+  const chips = document.querySelectorAll('.chip');
+  chips.forEach(chip => chip.classList.remove('active'));
+  event.target.classList.add('active');
+  applyFilters();
 }
 
 init();
