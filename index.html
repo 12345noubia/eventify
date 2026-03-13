@@ -975,17 +975,14 @@ document.querySelectorAll('.chip').forEach(c=>{
 const UNSPLASH_API_KEY = 'D0VoBabslhk-aM9VW1sHXbY-sO_CVsZDpsM8yDvKQkY';
 async function getPhoto(q,o){
   const query = encodeURIComponent((q||'event').trim());
-  const orientation = o==='portrait'?'portrait':o==='squarish'?'squarish':'landscape';
-  const size = o==='squarish'?'800x800':o==='portrait'?'800x1100':'1200x800';
-  const [w,h] = size.split('x');
-  const url = `https://api.unsplash.com/photos/random?query=${query}&orientation=${orientation}&w=${w}&h=${h}&client_id=${UNSPLASH_API_KEY}`;
+  const url = `https://api.unsplash.com/photos/random?query=${query}&client_id=${UNSPLASH_API_KEY}`;
   try {
     const res = await fetch(url);
-    if(!res.ok) throw new Error(`Unsplash API ${res.status}`);
+    if(!res.ok) throw new Error(`Unsplash API ${res.status}: ${res.statusText}`);
     const data = await res.json();
-    return data?.urls?.regular || data?.urls?.full || data?.urls?.small;
+    return data?.urls?.regular || data?.urls?.full || data?.urls?.small || '';
   } catch (error) {
-    console.warn('Unsplash API failed:', error);
+    console.error('Unsplash API failed:', error);
     return '';
   }
 }
