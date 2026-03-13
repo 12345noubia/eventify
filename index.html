@@ -834,7 +834,7 @@ function togglePw(id,btn){
     :'<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
 }
 
-function handleSignup(){
+async function handleSignup(){
   const name=document.getElementById('su-name').value.trim();
   const email=document.getElementById('su-email').value.trim();
   const pass=document.getElementById('su-pass').value;
@@ -849,6 +849,38 @@ function handleSignup(){
   setSession(newUser);
   closeAuth();
   updateNav(newUser);
+  try {
+    await sendWelcomeEmail(email, name);
+  } catch (error) {
+    console.error('Failed to send welcome email:', error);
+  }
+}
+
+function sendWelcomeEmail(email, name) {
+  const logoSrc = 'data:image/jpeg;base64,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';
+  const html = `
+    <html>
+    <body style="font-family: Arial, sans-serif; text-align: center;">
+      <img src="${logoSrc}" alt="Eventify Logo" style="height:50px; width:auto; margin-bottom: 20px;">
+      <h1>Welcome to Eventify, ${name}!</h1>
+      <p>Thank you for signing up. Discover amazing events near you.</p>
+      <img src="https://images.unsplash.com/photo-1630450202872-e0829c9d6172?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Welcome Image" style="max-width: 100%; height: auto; margin-top: 20px;">
+    </body>
+    </html>
+  `;
+  return fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer re_NnhDcfoU_QKKNgPydhQrvvzHjAWeV2DHs',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: 'Eventify <onboarding@resend.dev>',
+      to: [email],
+      subject: 'Welcome to Eventify!',
+      html: html
+    })
+  });
 }
 
 function handleLogin(){
